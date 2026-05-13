@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">Simplified ICE kernel and hardware interactions</title>
+  <desc id="desc">A simplified diagram showing the main Linux ICE interaction surfaces: kernel objects, driver queue state, DMA memory, MMIO registers, and the Admin Queue firmware path.</desc>
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#15803d"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b91c1c"/>
+    </marker>
+    <style>
+      .title { font: 700 26px Arial, Helvetica, sans-serif; fill: #111827; }
+      .subtitle { font: 500 15px Arial, Helvetica, sans-serif; fill: #374151; }
+      .box { stroke: #1f2937; stroke-width: 1.5; rx: 16; ry: 16; }
+      .kernel { fill: #dbeafe; }
+      .driver { fill: #ede9fe; }
+      .dma { fill: #dcfce7; }
+      .regs { fill: #fee2e2; }
+      .fw { fill: #fef3c7; }
+      .label { font: 700 18px Arial, Helvetica, sans-serif; fill: #111827; }
+      .text { font: 14px Arial, Helvetica, sans-serif; fill: #374151; }
+      .code { font: 14px 'DejaVu Sans Mono', 'Courier New', monospace; fill: #111827; }
+      .edge-blue { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#arrow-blue); }
+      .edge-green { stroke: #15803d; stroke-width: 3; fill: none; marker-end: url(#arrow-green); }
+      .edge-red { stroke: #b91c1c; stroke-width: 3; fill: none; marker-end: url(#arrow-red); }
+      .edge-dashed { stroke-dasharray: 7 6; }
+      .edge-text { font: 13px Arial, Helvetica, sans-serif; fill: #111827; }
+      .note { font: 13px Arial, Helvetica, sans-serif; fill: #374151; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="560" fill="#ffffff"/>
+  <text x="36" y="42" class="title">Simplified Linux ICE interaction surfaces</text>
+  <text x="36" y="66" class="subtitle">Focused on the exact categories named in overview.tex: kernel APIs, queue state, DMA, MMIO, and firmware Admin Queue commands</text>
+
+  <rect x="40" y="120" width="210" height="220" class="box kernel"/>
+  <text x="62" y="154" class="label">Linux kernel</text>
+  <text x="62" y="192" class="code">net_device</text>
+  <text x="62" y="220" class="code">napi_struct</text>
+  <text x="62" y="248" class="code">sk_buff</text>
+  <text x="62" y="292" class="text">Kernel-facing APIs:</text>
+  <text x="62" y="318" class="code">register_netdev</text>
+
+  <rect x="300" y="120" width="280" height="220" class="box driver"/>
+  <text x="322" y="154" class="label">ICE queue state</text>
+  <text x="322" y="192" class="code">ice_vsi</text>
+  <text x="322" y="220" class="code">ice_q_vector</text>
+  <text x="322" y="248" class="code">ice_rx_ring / ice_tx_ring</text>
+  <text x="322" y="292" class="text">Bridges kernel objects to</text>
+  <text x="322" y="314" class="text">DMA rings, MMIO, and firmware.</text>
+
+  <rect x="630" y="120" width="230" height="220" class="box dma"/>
+  <text x="652" y="154" class="label">DMA memory</text>
+  <text x="652" y="192" class="code">descriptor rings</text>
+  <text x="652" y="220" class="code">packet buffers</text>
+  <text x="652" y="264" class="text">Data-path APIs:</text>
+  <text x="652" y="290" class="code">dmam_alloc_coherent</text>
+  <text x="652" y="316" class="code">dma_map_single</text>
+
+  <rect x="910" y="120" width="250" height="100" class="box regs"/>
+  <text x="932" y="154" class="label">BAR / MMIO registers</text>
+  <text x="932" y="182" class="code">rd32 / wr32</text>
+  <text x="932" y="204" class="code">QRX_TAIL / QTX_COMM_DBELL</text>
+
+  <rect x="910" y="240" width="250" height="160" class="box fw"/>
+  <text x="932" y="274" class="label">Admin Queue firmware path</text>
+  <text x="932" y="306" class="code">ice_aq_send_cmd</text>
+  <text x="932" y="334" class="code">ATQ / ARQ</text>
+  <text x="932" y="362" class="text">Get Version then Driver Version</text>
+  <text x="932" y="388" class="text">ATQT and ARQT: driver</text>
+  <text x="932" y="412" class="text">ATQH and ARQH: firmware</text>
+
+  <path d="M 250 180 C 270 180, 280 180, 300 180" class="edge-blue"/>
+  <text x="258" y="168" class="edge-text">register_netdev</text>
+
+  <path d="M 250 220 C 270 220, 280 220, 300 220" class="edge-blue"/>
+  <text x="255" y="208" class="edge-text">netif_napi_add_config</text>
+
+  <path d="M 580 200 C 600 200, 610 200, 630 200" class="edge-green"/>
+  <text x="590" y="188" class="edge-text">desc rings and DMA addresses</text>
+
+  <path d="M 580 255 C 720 255, 780 170, 910 170" class="edge-red"/>
+  <text x="700" y="238" class="edge-text">rd32 / wr32 / tail doorbells</text>
+
+  <path d="M 580 285 C 720 285, 780 320, 910 320" class="edge-red"/>
+  <text x="680" y="306" class="edge-text">ice_aq_send_cmd</text>
+
+  <path d="M 300 265 C 250 305, 250 305, 250 305" class="edge-blue edge-dashed"/>
+  <text x="88" y="360" class="edge-text">napi_gro_receive returns packets to kernel</text>
+
+  <path d="M 860 320 C 885 320, 895 320, 910 320" class="edge-red edge-dashed"/>
+  <text x="840" y="340" class="edge-text">ATQ/ARQ control registers</text>
+
+  <text x="42" y="450" class="label">What this removes from the larger figure</text>
+  <text x="42" y="480" class="note">No per-structure backpointers, no separate Tx and Rx memory boxes, and no expanded Admin Queue memory details.</text>
+  <text x="42" y="504" class="note">The goal is to keep only the five interaction surfaces that the overview text actually relies on.</text>
+</svg>

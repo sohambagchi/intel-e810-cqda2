@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="920" viewBox="0 0 1400 920" role="img" aria-labelledby="title desc">
+  <title id="title">ICE kernel and hardware interactions</title>
+  <desc id="desc">Diagram showing Linux kernel objects, ICE driver state, DMA-backed memory, a BAR memory map with register regions, and firmware Admin Queue interactions.</desc>
+  <defs>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2b6cb0"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f855a"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6b46c1"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, Helvetica, sans-serif; fill: #111827; }
+      .subtitle { font: 500 15px Arial, Helvetica, sans-serif; fill: #374151; }
+      .group { fill: #f8fafc; stroke: #334155; stroke-width: 2; rx: 18; ry: 18; }
+      .group-title { font: 700 22px Arial, Helvetica, sans-serif; fill: #0f172a; }
+      .box { stroke: #1f2937; stroke-width: 1.5; rx: 12; ry: 12; }
+      .kernel { fill: #dbeafe; }
+      .driver { fill: #ede9fe; }
+      .memory { fill: #dcfce7; }
+      .device { fill: #fee2e2; }
+      .note { fill: #fef3c7; stroke: #92400e; stroke-width: 1.5; rx: 10; ry: 10; }
+      .label { font: 700 16px Arial, Helvetica, sans-serif; fill: #111827; }
+      .code { font: 14px 'DejaVu Sans Mono', 'Courier New', monospace; fill: #111827; }
+      .small { font: 12px Arial, Helvetica, sans-serif; fill: #374151; }
+      .edge-blue { stroke: #2b6cb0; stroke-width: 3; fill: none; marker-end: url(#arrow-blue); }
+      .edge-green { stroke: #2f855a; stroke-width: 3; fill: none; marker-end: url(#arrow-green); }
+      .edge-purple { stroke: #6b46c1; stroke-width: 3; fill: none; marker-end: url(#arrow-purple); }
+      .edge-dashed { stroke-dasharray: 7 6; }
+      .edge-text { font: 13px Arial, Helvetica, sans-serif; fill: #111827; }
+      .legend { font: 13px Arial, Helvetica, sans-serif; fill: #374151; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="920" fill="#ffffff"/>
+  <text x="40" y="42" class="title">Linux ICE: kernel, DMA, MMIO, and firmware interaction surfaces</text>
+  <text x="40" y="68" class="subtitle">Modeled after the struct-pointer-register-memory style of docs/ixgbe-dma.svg</text>
+
+  <rect x="30" y="90" width="280" height="360" class="group"/>
+  <text x="50" y="125" class="group-title">Linux kernel</text>
+
+  <rect x="55" y="150" width="225" height="74" class="box kernel"/>
+  <text x="74" y="178" class="label">net_device</text>
+  <text x="74" y="202" class="code">.ndo_start_xmit</text>
+
+  <rect x="55" y="250" width="225" height="74" class="box kernel"/>
+  <text x="74" y="278" class="label">napi_struct</text>
+  <text x="74" y="302" class="code">poll / GRO context</text>
+
+  <rect x="55" y="350" width="225" height="74" class="box kernel"/>
+  <text x="74" y="378" class="label">sk_buff</text>
+  <text x="74" y="402" class="code">packet object</text>
+
+  <rect x="340" y="90" width="520" height="500" class="group"/>
+  <text x="360" y="125" class="group-title">Linux ICE driver</text>
+
+  <rect x="365" y="150" width="220" height="110" class="box driver"/>
+  <text x="382" y="178" class="label">ice_vsi</text>
+  <text x="382" y="203" class="code">netdev</text>
+  <text x="382" y="223" class="code">rx_rings[]</text>
+  <text x="382" y="243" class="code">tx_rings[]</text>
+
+  <rect x="615" y="150" width="220" height="110" class="box driver"/>
+  <text x="632" y="178" class="label">ice_q_vector</text>
+  <text x="632" y="203" class="code">vsi</text>
+  <text x="632" y="223" class="code">embedded napi</text>
+
+  <rect x="365" y="295" width="220" height="135" class="box driver"/>
+  <text x="382" y="323" class="label">ice_rx_ring</text>
+  <text x="382" y="348" class="code">desc</text>
+  <text x="382" y="368" class="code">dma</text>
+  <text x="382" y="388" class="code">tail</text>
+  <text x="382" y="408" class="code">q_vector / netdev / vsi</text>
+
+  <rect x="615" y="295" width="220" height="135" class="box driver"/>
+  <text x="632" y="323" class="label">ice_tx_ring</text>
+  <text x="632" y="348" class="code">desc</text>
+  <text x="632" y="368" class="code">dma</text>
+  <text x="632" y="388" class="code">tail</text>
+  <text x="632" y="408" class="code">q_vector / netdev / vsi</text>
+
+  <rect x="365" y="465" width="220" height="95" class="box driver"/>
+  <text x="382" y="493" class="label">ice_hw</text>
+  <text x="382" y="518" class="code">hw_addr</text>
+  <text x="382" y="538" class="code">adminq</text>
+
+  <rect x="615" y="465" width="220" height="95" class="box driver"/>
+  <text x="632" y="493" class="label">ice_ctl_q_info</text>
+  <text x="632" y="518" class="code">SQ / ATQ</text>
+  <text x="632" y="538" class="code">RQ / ARQ</text>
+
+  <rect x="340" y="620" width="520" height="250" class="group"/>
+  <text x="360" y="655" class="group-title">Host DMA memory</text>
+
+  <rect x="365" y="690" width="160" height="90" class="box memory"/>
+  <text x="383" y="720" class="label">Tx descriptor ring</text>
+  <text x="383" y="745" class="code">tx_ring-&gt;desc</text>
+
+  <rect x="550" y="690" width="160" height="90" class="box memory"/>
+  <text x="568" y="720" class="label">Rx descriptor ring</text>
+  <text x="568" y="745" class="code">rx_ring-&gt;desc</text>
+
+  <rect x="735" y="690" width="100" height="90" class="box memory"/>
+  <text x="751" y="720" class="label">Packet</text>
+  <text x="751" y="745" class="label">data</text>
+
+  <rect x="365" y="800" width="160" height="50" class="box memory"/>
+  <text x="392" y="831" class="label">ATQ descriptors</text>
+
+  <rect x="550" y="800" width="250" height="50" class="box memory"/>
+  <text x="568" y="831" class="label">ARQ descriptors and buffers</text>
+
+  <rect x="900" y="90" width="460" height="780" class="group"/>
+  <text x="920" y="125" class="group-title">BAR memory map and firmware</text>
+
+  <rect x="930" y="155" width="230" height="430" class="box device"/>
+  <text x="950" y="185" class="label">BAR0 / MMIO memory map</text>
+  <text x="950" y="210" class="code">hw_addr points to this region</text>
+
+  <rect x="955" y="230" width="180" height="62" class="box device"/>
+  <text x="973" y="257" class="label">QRX_TAIL region</text>
+  <text x="973" y="279" class="small">Rx queue tail doorbells</text>
+
+  <rect x="955" y="310" width="180" height="62" class="box device"/>
+  <text x="968" y="337" class="label">QTX_COMM_DBELL region</text>
+  <text x="973" y="359" class="small">Tx queue tail doorbells</text>
+
+  <text x="988" y="402" class="small">other BAR regions omitted</text>
+
+  <rect x="955" y="430" width="180" height="115" class="box device"/>
+  <text x="973" y="457" class="label">Admin Queue CSR region</text>
+  <text x="973" y="481" class="code">ATQBAL/H ATQLEN ATQH/T</text>
+  <text x="973" y="503" class="code">ARQBAL/H ARQLEN ARQH/T</text>
+  <text x="973" y="525" class="small">base, len, head, and tail state</text>
+
+  <rect x="1185" y="175" width="145" height="140" class="box device"/>
+  <text x="1200" y="202" class="label">Firmware / AQ</text>
+  <text x="1200" y="228" class="small">consumes ATQ</text>
+  <text x="1200" y="250" class="small">fills ARQ</text>
+  <text x="1200" y="278" class="code">Get Version</text>
+  <text x="1200" y="300" class="code">Driver Version</text>
+
+  <rect x="1185" y="345" width="145" height="185" class="note"/>
+  <text x="1200" y="372" class="label">Ownership</text>
+  <text x="1200" y="398" class="small">ATQT and ARQT:</text>
+  <text x="1200" y="418" class="small">driver updates</text>
+  <text x="1200" y="446" class="small">ATQH and ARQH:</text>
+  <text x="1200" y="466" class="small">firmware/device</text>
+  <text x="1200" y="494" class="small">Rx refill publishes</text>
+  <text x="1200" y="514" class="small">descriptors via QRX_TAIL</text>
+
+  <path d="M 280 187 C 320 187, 330 187, 365 187" class="edge-blue"/>
+  <text x="300" y="178" class="edge-text">vsi-&gt;netdev</text>
+
+  <path d="M 280 187 C 365 187, 580 187, 615 205" class="edge-blue edge-dashed"/>
+  <text x="470" y="170" class="edge-text">netif_napi_add_config</text>
+
+  <path d="M 585 205 C 600 205, 605 205, 615 205" class="edge-blue"/>
+  <text x="598" y="195" class="edge-text">q_vectors[]</text>
+
+  <path d="M 725 260 C 725 268, 725 278, 725 295" class="edge-blue"/>
+  <text x="742" y="286" class="edge-text">embedded napi</text>
+
+  <path d="M 475 260 C 475 275, 475 285, 475 295" class="edge-blue"/>
+  <text x="492" y="286" class="edge-text">rx_rings[]</text>
+
+  <path d="M 475 260 C 560 268, 650 275, 725 295" class="edge-blue"/>
+  <text x="575" y="280" class="edge-text">tx_rings[]</text>
+
+  <path d="M 280 387 C 320 387, 360 387, 615 365" class="edge-blue"/>
+  <text x="360" y="377" class="edge-text">.ndo_start_xmit</text>
+
+  <path d="M 475 430 C 430 470, 280 300, 280 300" class="edge-blue"/>
+  <text x="308" y="333" class="edge-text">napi_gro_receive(...)</text>
+
+  <path d="M 475 430 C 475 540, 475 640, 445 690" class="edge-green"/>
+  <text x="420" y="590" class="edge-text">desc + dma</text>
+
+  <path d="M 725 430 C 725 540, 725 640, 445 735" class="edge-green"/>
+  <text x="690" y="590" class="edge-text">desc + dma</text>
+
+  <path d="M 725 430 C 760 520, 790 610, 785 690" class="edge-green"/>
+  <text x="795" y="592" class="edge-text">dma_map_single(skb-&gt;data)</text>
+
+  <path d="M 785 690 C 735 675, 690 675, 525 720" class="edge-green edge-dashed"/>
+  <text x="620" y="684" class="edge-text">tx_desc-&gt;buf_addr = dma</text>
+
+  <path d="M 475 512 C 650 512, 780 205, 930 205" class="edge-purple"/>
+  <text x="690" y="250" class="edge-text">rd32 / wr32 via hw_addr</text>
+
+  <path d="M 475 362 C 820 362, 900 260, 955 260" class="edge-purple"/>
+  <text x="770" y="344" class="edge-text">tail = hw_addr + QRX_TAIL(...)</text>
+
+  <path d="M 725 362 C 860 362, 900 340, 955 340" class="edge-purple"/>
+  <text x="828" y="344" class="edge-text">tail = hw_addr + QTX_COMM_DBELL(...)</text>
+
+  <path d="M 475 512 C 620 512, 660 512, 615 512" class="edge-blue edge-dashed"/>
+  <text x="505" y="500" class="edge-text">hw-&gt;adminq</text>
+
+  <path d="M 725 560 C 725 640, 725 760, 445 825" class="edge-green"/>
+  <text x="680" y="720" class="edge-text">SQ / ATQ memory</text>
+
+  <path d="M 725 560 C 780 650, 790 760, 675 800" class="edge-green"/>
+  <text x="730" y="760" class="edge-text">RQ / ARQ memory</text>
+
+  <path d="M 835 512 C 900 512, 930 485, 955 485" class="edge-purple"/>
+  <text x="852" y="490" class="edge-text">queue base, len, head, tail</text>
+
+  <path d="M 835 512 C 980 512, 1110 255, 1185 255" class="edge-purple"/>
+  <text x="960" y="532" class="edge-text">ice_aq_send_cmd(...)</text>
+
+  <path d="M 445 825 C 845 825, 1010 226, 1185 226" class="edge-green edge-dashed"/>
+  <text x="700" y="842" class="edge-text">ATQ descriptors consumed by firmware</text>
+
+  <path d="M 675 825 C 900 825, 1060 248, 1185 248" class="edge-green edge-dashed"/>
+  <text x="770" y="807" class="edge-text">ARQ buffers filled by firmware</text>
+
+  <path d="M 1185 300 C 1160 340, 1145 430, 1135 485" class="edge-purple edge-dashed"/>
+  <text x="1144" y="360" class="edge-text">updates ATQH / ARQH</text>
+
+  <line x1="48" y1="882" x2="88" y2="882" class="edge-blue"/>
+  <text x="96" y="887" class="legend">kernel and driver object links / callbacks</text>
+  <line x1="470" y1="882" x2="510" y2="882" class="edge-green"/>
+  <text x="518" y="887" class="legend">DMA-backed memory and descriptor publication</text>
+  <line x1="960" y1="882" x2="1000" y2="882" class="edge-purple"/>
+  <text x="1008" y="887" class="legend">MMIO register access and firmware interaction</text>
+</svg>

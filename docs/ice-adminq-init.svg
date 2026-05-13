@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">ICE Admin Queue bring-up</title>
+  <desc id="desc">Diagram showing the ICE Admin Queue initialization order and register ownership.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1d4ed8"/>
+    </marker>
+    <style>
+      .title { font: 700 28px Arial, Helvetica, sans-serif; fill: #111827; }
+      .subtitle { font: 500 15px Arial, Helvetica, sans-serif; fill: #374151; }
+      .step { fill: #eef2ff; stroke: #4338ca; stroke-width: 2; rx: 16; ry: 16; }
+      .mem { fill: #dcfce7; stroke: #166534; stroke-width: 1.5; rx: 12; ry: 12; }
+      .regs { fill: #fee2e2; stroke: #b91c1c; stroke-width: 1.5; rx: 12; ry: 12; }
+      .note { fill: #fef3c7; stroke: #92400e; stroke-width: 1.5; rx: 12; ry: 12; }
+      .label { font: 700 17px Arial, Helvetica, sans-serif; fill: #111827; }
+      .text { font: 14px Arial, Helvetica, sans-serif; fill: #1f2937; }
+      .code { font: 14px 'DejaVu Sans Mono', 'Courier New', monospace; fill: #111827; }
+      .edge { stroke: #1d4ed8; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .edge-text { font: 13px Arial, Helvetica, sans-serif; fill: #111827; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="820" fill="#ffffff"/>
+  <text x="40" y="45" class="title">E810 firmware Admin Queue bring-up</text>
+  <text x="40" y="72" class="subtitle">Exact ordering used in overview.tex, plus head/tail ownership</text>
+
+  <rect x="60" y="120" width="520" height="110" class="step"/>
+  <text x="85" y="150" class="label">1. Allocate queue memory and pre-post ARQ buffers</text>
+  <text x="85" y="178" class="code">ice_alloc_ctrlq_sq_ring() / ice_alloc_ctrlq_rq_ring()</text>
+  <text x="85" y="202" class="code">ice_alloc_rq_bufs()</text>
+
+  <rect x="60" y="270" width="520" height="90" class="step"/>
+  <text x="85" y="300" class="label">2. Clear queue head and tail registers</text>
+  <text x="85" y="328" class="code">ATQH, ATQT, ARQH, ARQT = 0</text>
+
+  <rect x="60" y="400" width="520" height="110" class="step"/>
+  <text x="85" y="430" class="label">3. Program base and length registers</text>
+  <text x="85" y="458" class="code">ATQBAL/H, ATQLEN(enable)</text>
+  <text x="85" y="482" class="code">ARQBAL/H, ARQLEN(enable)</text>
+
+  <rect x="60" y="550" width="520" height="90" class="step"/>
+  <text x="85" y="580" class="label">4. First AQ command must be Get Version</text>
+  <text x="85" y="608" class="code">Get Version (0x0001)</text>
+
+  <rect x="60" y="680" width="520" height="90" class="step"/>
+  <text x="85" y="710" class="label">5. Only after a compatible reply, identify the driver</text>
+  <text x="85" y="738" class="code">Driver Version (0x0002)</text>
+
+  <rect x="680" y="120" width="220" height="120" class="mem"/>
+  <text x="705" y="152" class="label">ATQ memory</text>
+  <text x="705" y="180" class="text">descriptor ring</text>
+  <text x="705" y="205" class="text">send queue</text>
+
+  <rect x="930" y="120" width="220" height="120" class="mem"/>
+  <text x="955" y="152" class="label">ARQ memory</text>
+  <text x="955" y="180" class="text">descriptor ring</text>
+  <text x="955" y="205" class="text">pre-posted buffers</text>
+
+  <rect x="680" y="300" width="470" height="170" class="regs"/>
+  <text x="705" y="332" class="label">Admin Queue control registers</text>
+  <text x="705" y="362" class="code">ATQBAL / ATQBAH / ATQLEN / ATQH / ATQT</text>
+  <text x="705" y="388" class="code">ARQBAL / ARQBAH / ARQLEN / ARQH / ARQT</text>
+  <text x="705" y="420" class="text">ATQT, ARQT updated by driver</text>
+  <text x="705" y="446" class="text">ATQH, ARQH updated by firmware or device</text>
+
+  <rect x="680" y="540" width="470" height="150" class="note"/>
+  <text x="705" y="572" class="label">Command-order constraint</text>
+  <text x="705" y="602" class="text">The driver must issue Get Version before using the</text>
+  <text x="705" y="626" class="text">firmware Admin Queue for anything else.</text>
+  <text x="705" y="656" class="text">If major versions do not match, the driver fails to load.</text>
+
+  <path d="M 320 230 L 320 270" class="edge"/>
+  <path d="M 320 360 L 320 400" class="edge"/>
+  <path d="M 320 510 L 320 550" class="edge"/>
+  <path d="M 320 640 L 320 680" class="edge"/>
+
+  <path d="M 580 175 C 620 175, 640 175, 680 175" class="edge"/>
+  <text x="600" y="164" class="edge-text">ATQ descriptors</text>
+
+  <path d="M 580 175 C 640 175, 820 175, 930 175" class="edge"/>
+  <text x="760" y="164" class="edge-text">ARQ descriptors and buffers</text>
+
+  <path d="M 900 240 C 900 270, 900 285, 900 300" class="edge"/>
+  <path d="M 1040 240 C 1040 270, 1040 285, 1040 300" class="edge"/>
+  <text x="913" y="287" class="edge-text">base / len</text>
+
+  <path d="M 580 455 C 630 455, 650 420, 680 420" class="edge"/>
+  <text x="595" y="438" class="edge-text">program registers and enable queues</text>
+
+  <path d="M 580 595 C 635 595, 650 595, 680 595" class="edge"/>
+  <text x="600" y="584" class="edge-text">first command</text>
+
+  <path d="M 580 725 C 645 725, 655 650, 680 650" class="edge"/>
+  <text x="605" y="708" class="edge-text">only after compatible reply</text>
+
+  <rect x="680" y="720" width="470" height="60" class="note"/>
+  <text x="705" y="748" class="text">This figure is the exact ordered device-action sequence used in the overview narrative.</text>
+  <text x="705" y="770" class="text">It is intended as a control-path companion to the larger kernel/hardware interaction diagram.</text>
+</svg>

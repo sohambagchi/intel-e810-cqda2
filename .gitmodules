@@ -1,0 +1,12 @@
+[submodule "docs/knowledge"]
+	path = docs/knowledge
+	url = git@github.com:sohambagchi/knowledge-driver-synthesis
+[submodule "amazon26"]
+	path = amazon26
+	url = git@github.com:antonburtsev/amazon26.git
+[submodule "verus"]
+	path = verus
+	url = git@github.com:microsoft/verus-proof-synthesis.git
+[submodule "dpdk"]
+	path = dpdk
+	url = git@github.com:DPDK/dpdk.git
